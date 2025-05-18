@@ -1,0 +1,8 @@
+name: 'User contact forms'
+type: module
+description: 'Provides plugin to link user name directly to the user contact form.'
+core_version_requirement: ^9 || ^10 || ^11
+dependencies:
+  - drupal:contact
+  - drupal:node 
+  - drupal:user

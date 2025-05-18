@@ -1,0 +1,5 @@
+services:
+  user_contacts.route_subscriber:
+    class: Drupal\user_contacts\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

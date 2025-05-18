@@ -1,0 +1,15 @@
+{
+    "name": "bikeclub/user_contacts",
+    "description": "Plugin to display a User entity reference field with a direct link to the user contact form.",
+    "keywords": ["module", "Contacts"],
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Nancy Cole",
+            "homepage": "https://bikeclubsites.com",
+            "role": "Maintainer"
+        }
+    ],
+    "version": "1.0.1"
+}
