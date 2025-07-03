@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\user_contacts\Plugin\Field\FieldFormatter;
+namespace Drupal\user_contactlink\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
@@ -25,7 +25,7 @@ class UserContactFormatter extends EntityReferenceFormatterBase {
    * {@inheritdoc}
    */
   public static function isApplicable(FieldDefinitionInterface $field_definition) {
-    // ""Link to contact form" is applicable only for entity reference user fields.
+    // "Link to contact form" is an option only for entity reference user fields.
     $settings = $field_definition->getItemDefinition()->getSettings();
     return ($settings['target_type'] == 'user');
   }
@@ -37,26 +37,28 @@ class UserContactFormatter extends EntityReferenceFormatterBase {
     $elements = [];
     $currentUserId = \Drupal::currentUser()->id();
 
-    foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
+    $contacts = $items->getValue('target_id'); // Array contact persons.
 
-      // Entity is the user being contacted.
-      $elements[$delta] = ['#entity' => $entity];
+    foreach($contacts as $delta => $contact) {
+        
+        $uid = $contact['target_id'];
+        $contact = \Drupal::service('entity_type.manager')->getStorage('user')->load($uid);
 
-      if ($entity->getEntityTypeId() == 'user') {
-        $contact_id = $entity->id();
-        $contact_name = $entity->label();
+        // Contact is the user entity being contacted.
+        $elements[$delta] = ['#entity' => $contact];
+
+        $contact_id = $contact->id();
+        $contact_name = $contact->label();
 
         // Get URL for contact form.
-        $url = \Drupal\Core\Url::fromRoute('entity.user.contact_form', ['user' => $contact_id] );
-
-        // Is personal contact form enabled?
+        $url = \Drupal\Core\Url::fromRoute('entity.user_contactlink.contact_form', ['user' => $contact_id] );
+                                         
+        // Is personal contact form enabled for person being contacted?
         $userData = \Drupal::service('user.data');
         $enabled = $userData->get('contact', $contact_id, 'enabled');
 
-        // Display as plain text names without link if:
-        //  Current user = contact person (Users may not contact themselves)
-        //  Person to contact has disabled their contact form
-        if ($currentUserId == $contact_id or !$enabled) {
+        // Plain text if $contact did not enable contact form, and so user cannot contact self.
+        if ( !$enabled or $currentUserId == $contact_id ) {
           $elements[$delta] += [
             '#plain_text' => $contact_name,
           ];      
@@ -68,7 +70,6 @@ class UserContactFormatter extends EntityReferenceFormatterBase {
             '#url' => $url,
           ];      
         }
-      }
     }
     return $elements;
   }
